@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -31,6 +32,18 @@ interface MoodChartProps {
 }
 
 export default function MoodChart({ data }: MoodChartProps) {
+  const chartRef = useRef<any>(null);
+  const startTime = useRef(performance.now());
+
+  useEffect(() => {
+    const endTime = performance.now();
+    console.log('图表渲染性能:', {
+      renderTime: endTime - startTime.current,
+      dataPoints: data.length,
+      timestamp: new Date().toISOString()
+    });
+  }, [data]);
+
   const chartData: ChartData<'line'> = {
     labels: data.map((entry) => format(new Date(entry.date), 'MM/dd', { locale: zhCN })),
     datasets: [
@@ -67,7 +80,7 @@ export default function MoodChart({ data }: MoodChartProps) {
 
   return (
     <div className="w-full h-64">
-      <Line data={chartData} options={options} />
+      <Line ref={chartRef} data={chartData} options={options} />
     </div>
   );
 } 

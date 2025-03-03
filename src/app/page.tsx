@@ -18,12 +18,21 @@ export default function Home() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 添加自动刷新功能
   useEffect(() => {
     const startTime = performance.now();
     fetchEntries().finally(() => {
       const endTime = performance.now();
-      console.log(`页面加载时间: ${endTime - startTime}ms`);
+      console.log('页面加载性能:', {
+        loadTime: endTime - startTime,
+        entriesCount: entries.length,
+        timestamp: new Date().toISOString()
+      });
     });
+
+    // 每5分钟自动刷新一次
+    const interval = setInterval(fetchEntries, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchEntries = async () => {
@@ -51,7 +60,24 @@ export default function Home() {
         timestamp: new Date().toISOString()
       });
       
-      setEntries(Array.isArray(data) ? data : []);
+      // 确保数据格式正确
+      const validEntries = Array.isArray(data) ? data.filter(entry => {
+        const isValid = entry && 
+          typeof entry.date === 'string' &&
+          typeof entry.mood === 'number' &&
+          entry.mood >= 1 && entry.mood <= 10 &&
+          Array.isArray(entry.gratitude);
+        
+        if (!isValid) {
+          console.error('无效的日记条目:', {
+            entry,
+            timestamp: new Date().toISOString()
+          });
+        }
+        return isValid;
+      }) : [];
+      
+      setEntries(validEntries);
     } catch (err: unknown) {
       console.error('获取日记列表失败:', {
         error: err,
@@ -72,7 +98,8 @@ export default function Home() {
       setIsSubmitting(true);
       console.log('开始保存日记:', {
         formData,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        currentEntriesCount: entries.length
       });
 
       const url = formData._id ? '/api/diary' : '/api/diary';
@@ -100,19 +127,30 @@ export default function Home() {
       const savedEntry = await response.json();
       console.log('保存日记成功:', {
         entry: savedEntry,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        currentEntriesCount: entries.length
       });
 
+      // 更新本地状态
       setEntries(prev => {
-        if (formData._id) {
-          return prev.map(entry => 
-            entry._id === formData._id ? savedEntry : entry
-          );
-        }
-        return [savedEntry, ...prev];
+        const newEntries = formData._id
+          ? prev.map(entry => entry._id === formData._id ? savedEntry : entry)
+          : [savedEntry, ...prev];
+        
+        console.log('本地状态更新:', {
+          oldCount: prev.length,
+          newCount: newEntries.length,
+          timestamp: new Date().toISOString()
+        });
+        
+        return newEntries;
       });
+      
       setEditingEntry(null);
       setSuccess('日记保存成功');
+      
+      // 重新获取数据以确保同步
+      await fetchEntries();
     } catch (err) {
       console.error('保存失败:', {
         error: err,
@@ -138,18 +176,44 @@ export default function Home() {
     }
 
     try {
+      console.log('开始删除日记:', {
+        id,
+        timestamp: new Date().toISOString()
+      });
+
       const response = await fetch(`/api/diary?id=${id}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error('删除失败');
+        const errorData = await response.json();
+        console.error('删除日记失败:', {
+          status: response.status,
+          error: errorData,
+          id,
+          timestamp: new Date().toISOString()
+        });
+        throw new Error(errorData.details || '删除失败');
       }
 
+      console.log('删除日记成功:', {
+        id,
+        timestamp: new Date().toISOString()
+      });
+
+      // 更新本地状态
       setEntries(prev => prev.filter(entry => entry._id !== id));
       setSuccess('日记删除成功');
+      
+      // 重新获取数据以确保同步
+      await fetchEntries();
     } catch (err) {
-      console.error('删除失败:', err);
+      console.error('删除失败:', {
+        error: err,
+        message: err instanceof Error ? err.message : '未知错误',
+        id,
+        timestamp: new Date().toISOString()
+      });
       setError('删除失败，请重试');
     }
   };
