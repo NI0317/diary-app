@@ -29,20 +29,35 @@ export default function Home() {
   const fetchEntries = async () => {
     try {
       setError(null);
+      console.log('开始获取日记列表:', {
+        timestamp: new Date().toISOString(),
+        env: process.env.NODE_ENV
+      });
+      
       const response = await fetch('/api/diary');
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('获取日记失败:', {
+          status: response.status,
+          error: errorData,
+          timestamp: new Date().toISOString()
+        });
         throw new Error(errorData.details || '获取日记失败');
       }
+      
       const data = await response.json();
-      console.log('API response:', {
-        raw: data,
-        formatted: Array.isArray(data) ? data : [],
+      console.log('获取日记成功:', {
+        count: Array.isArray(data) ? data.length : 0,
         timestamp: new Date().toISOString()
       });
+      
       setEntries(Array.isArray(data) ? data : []);
     } catch (err: unknown) {
-      console.error('获取日记列表失败:', err);
+      console.error('获取日记列表失败:', {
+        error: err,
+        message: err instanceof Error ? err.message : '未知错误',
+        timestamp: new Date().toISOString()
+      });
       setError('获取日记列表失败');
       setEntries([]);
     } finally {
@@ -55,16 +70,12 @@ export default function Home() {
     
     try {
       setIsSubmitting(true);
-      console.log('Form validation:', {
-        date: formData.date,
-        mood: formData.mood,
+      console.log('开始保存日记:', {
+        formData,
         timestamp: new Date().toISOString()
       });
 
-      const url = formData._id 
-        ? '/api/diary'  // 更新日记
-        : '/api/diary'; // 创建新日记
-      
+      const url = formData._id ? '/api/diary' : '/api/diary';
       const method = formData._id ? 'PUT' : 'POST';
       
       const response = await fetch(url, {
@@ -77,20 +88,18 @@ export default function Home() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('API error:', {
+        console.error('保存日记失败:', {
           status: response.status,
-          statusText: response.statusText,
-          data: errorData,
+          error: errorData,
+          formData,
           timestamp: new Date().toISOString()
         });
         throw new Error(errorData.details || '保存失败');
       }
 
       const savedEntry = await response.json();
-      console.log('State updates:', {
-        entries: entries.length,
-        editingEntry: editingEntry?._id,
-        savedEntry,
+      console.log('保存日记成功:', {
+        entry: savedEntry,
         timestamp: new Date().toISOString()
       });
 
@@ -105,7 +114,12 @@ export default function Home() {
       setEditingEntry(null);
       setSuccess('日记保存成功');
     } catch (err) {
-      console.error('保存失败:', err);
+      console.error('保存失败:', {
+        error: err,
+        message: err instanceof Error ? err.message : '未知错误',
+        formData,
+        timestamp: new Date().toISOString()
+      });
       setError('保存失败，请重试');
     } finally {
       setIsSubmitting(false);
