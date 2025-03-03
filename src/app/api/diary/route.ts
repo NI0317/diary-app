@@ -4,12 +4,23 @@ import DiaryEntry from '@/lib/models/DiaryEntry';
 
 export async function GET() {
   try {
+    console.log('开始获取日记列表...');
     await dbConnect();
+    console.log('数据库连接成功，开始查询...');
     const entries = await DiaryEntry.find().sort({ date: -1 });
+    console.log(`成功获取 ${entries.length} 条日记`);
     return NextResponse.json(entries);
   } catch (err) {
-    console.error('获取日记列表失败:', err);
-    return NextResponse.json({ error: '获取日记列表失败' }, { status: 500 });
+    console.error('获取日记列表失败:', {
+      error: err,
+      message: err instanceof Error ? err.message : '未知错误',
+      stack: err instanceof Error ? err.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
+    return NextResponse.json({ 
+      error: '获取日记列表失败',
+      details: err instanceof Error ? err.message : '未知错误'
+    }, { status: 500 });
   }
 }
 
