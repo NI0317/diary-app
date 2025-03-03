@@ -45,8 +45,7 @@ async function dbConnect() {
       maxPoolSize: 10,
       minPoolSize: 5,
       retryWrites: true,
-      w: 'majority',
-      tls: true
+      w: 'majority'
     });
     
     console.log('MongoDB 连接成功');
