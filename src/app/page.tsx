@@ -5,7 +5,8 @@ import DiaryForm, { DiaryFormData } from '@/components/DiaryForm';
 import DiaryList from '@/components/DiaryList';
 import MoodChart from '@/components/MoodChart';
 
-type DiaryEntry = DiaryFormData & {
+// 确保 DiaryEntry 包含所有必需字段
+type DiaryEntry = Omit<DiaryFormData, '_id'> & {
   _id: string;
 };
 

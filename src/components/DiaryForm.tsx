@@ -20,6 +20,8 @@ export interface DiaryFormData {
 
 export default function DiaryForm({ onSubmit, initialData }: DiaryFormProps) {
   const [formData, setFormData] = useState<DiaryFormData>(initialData || {
+    title: '',
+    content: '',
     date: new Date().toISOString().split('T')[0],
     mood: 5,
     learned: '',
@@ -31,6 +33,25 @@ export default function DiaryForm({ onSubmit, initialData }: DiaryFormProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    
+    // 验证必需字段
+    if (!formData.title.trim()) {
+      alert('请输入标题');
+      return;
+    }
+    if (!formData.content.trim()) {
+      alert('请输入内容');
+      return;
+    }
+    if (!formData.date) {
+      alert('请选择日期');
+      return;
+    }
+    if (formData.mood < 1 || formData.mood > 10) {
+      alert('心情值必须在1-10之间');
+      return;
+    }
+
     await onSubmit(formData);
   };
 
