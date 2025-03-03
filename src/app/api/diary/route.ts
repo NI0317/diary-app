@@ -58,14 +58,22 @@ export async function POST(request: NextRequest) {
     console.log('数据库连接成功');
     
     const data = await request.json();
-    console.log('接收到的数据:', JSON.stringify(data, null, 2));
+    console.log('接收到的数据:', {
+      data,
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV
+    });
     
     // 验证必需字段
-    const requiredFields = ['title', 'date', 'mood', 'learned', 'improvements', 'gratitude', 'lookingForward', 'news'];
+    const requiredFields = ['date', 'mood', 'learned', 'improvements', 'gratitude', 'lookingForward', 'news'];
     const missingFields = requiredFields.filter(field => !data[field]);
     
     if (missingFields.length > 0) {
-      console.error('缺少必需字段:', missingFields);
+      console.error('缺少必需字段:', {
+        missingFields,
+        receivedFields: Object.keys(data),
+        timestamp: new Date().toISOString()
+      });
       return NextResponse.json({ 
         error: '创建日记失败',
         details: `缺少必需字段: ${missingFields.join(', ')}`
@@ -74,15 +82,22 @@ export async function POST(request: NextRequest) {
 
     console.log('开始创建日记条目...');
     const entry = await DiaryEntry.create(data);
-    console.log('日记创建成功:', entry);
+    console.log('日记创建成功:', {
+      entry,
+      timestamp: new Date().toISOString()
+    });
     
     return NextResponse.json(entry);
   } catch (err: unknown) {
-    console.error('创建日记失败:', err);
-    console.error('错误详情:', {
-      name: err instanceof Error ? err.name : '未知错误类型',
+    console.error('创建日记失败:', {
+      error: err,
       message: err instanceof Error ? err.message : '未知错误',
-      stack: err instanceof Error ? err.stack : undefined
+      stack: err instanceof Error ? err.stack : undefined,
+      timestamp: new Date().toISOString(),
+      env: {
+        hasMongoDBUri: !!process.env.MONGODB_URI,
+        nodeEnv: process.env.NODE_ENV
+      }
     });
     
     return NextResponse.json({ 
