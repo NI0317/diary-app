@@ -40,12 +40,14 @@ async function dbConnect() {
     });
 
     await mongoose.connect(MONGODB_URI as string, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
       maxPoolSize: 10,
       minPoolSize: 5,
       retryWrites: true,
-      w: 'majority'
+      w: 'majority',
+      connectTimeoutMS: 10000,
+      family: 4
     });
     
     console.log('MongoDB 连接成功');
