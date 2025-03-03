@@ -17,7 +17,8 @@ export async function PUT(
       return NextResponse.json({ error: '日记不存在' }, { status: 404 });
     }
     return NextResponse.json(entry);
-  } catch (error) {
+  } catch (err) {
+    console.error('更新日记失败:', err);
     return NextResponse.json({ error: '更新日记失败' }, { status: 500 });
   }
 }
@@ -33,7 +34,8 @@ export async function DELETE(
       return NextResponse.json({ error: '日记不存在' }, { status: 404 });
     }
     return NextResponse.json({ message: '删除成功' });
-  } catch (error) {
+  } catch (err) {
+    console.error('删除日记失败:', err);
     return NextResponse.json({ error: '删除日记失败' }, { status: 500 });
   }
 } 

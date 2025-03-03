@@ -5,8 +5,11 @@ import DiaryForm, { DiaryFormData } from '@/components/DiaryForm';
 import DiaryList from '@/components/DiaryList';
 import MoodChart from '@/components/MoodChart';
 
-interface DiaryEntry extends DiaryFormData {
+interface DiaryEntry {
   _id: string;
+  title: string;
+  content: string;
+  mood: number;
   date: string;
 }
 
@@ -31,9 +34,9 @@ export default function Home() {
       }
       const data = await response.json();
       setEntries(Array.isArray(data) ? data : []);
-    } catch (error: any) {
-      console.error('获取日记失败:', error);
-      setError(error.message || '获取日记失败');
+    } catch (err: unknown) {
+      console.error('获取日记列表失败:', err);
+      setError('获取日记列表失败');
       setEntries([]);
     } finally {
       setIsLoading(false);
@@ -75,9 +78,9 @@ export default function Home() {
         setSuccess('日记保存成功');
         await fetchEntries();
       }
-    } catch (error: any) {
-      console.error('保存日记失败:', error);
-      setError(error.message || '保存日记失败');
+    } catch (err: unknown) {
+      console.error('保存日记失败:', err);
+      setError('保存日记失败');
     }
   };
 
@@ -107,9 +110,9 @@ export default function Home() {
       
       setSuccess('日记删除成功');
       await fetchEntries();
-    } catch (error: any) {
-      console.error('删除日记失败:', error);
-      setError(error.message || '删除日记失败');
+    } catch (err: unknown) {
+      console.error('删除日记失败:', err);
+      setError('删除日记失败');
     }
   };
 

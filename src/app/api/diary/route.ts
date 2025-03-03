@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import DiaryEntry from '@/lib/models/DiaryEntry';
 
+interface DiaryRequest {
+  title: string;
+  content: string;
+  mood: number;
+  date: string;
+}
+
 export async function POST(request: Request) {
   try {
     console.log('开始创建新日记...');
@@ -28,18 +35,12 @@ export async function POST(request: Request) {
     console.log('日记创建成功:', entry);
     
     return NextResponse.json(entry);
-  } catch (error: any) {
-    console.error('创建日记失败:', error);
-    console.error('错误详情:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    });
-    
-    return NextResponse.json({ 
-      error: '创建日记失败',
-      details: error.message
-    }, { status: 500 });
+  } catch (err: unknown) {
+    console.error('创建日记失败:', err);
+    return NextResponse.json(
+      { error: '创建日记失败' },
+      { status: 500 }
+    );
   }
 }
 
@@ -53,17 +54,11 @@ export async function GET() {
     console.log(`成功获取 ${entries.length} 条日记`);
     
     return NextResponse.json(entries);
-  } catch (error: any) {
-    console.error('获取日记失败:', error);
-    console.error('错误详情:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    });
-    
-    return NextResponse.json({ 
-      error: '获取日记失败',
-      details: error.message
-    }, { status: 500 });
+  } catch (err: unknown) {
+    console.error('获取日记列表失败:', err);
+    return NextResponse.json(
+      { error: '获取日记列表失败' },
+      { status: 500 }
+    );
   }
 } 

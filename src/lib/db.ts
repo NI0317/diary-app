@@ -42,18 +42,9 @@ async function dbConnect() {
     
     isConnected = true;
     console.log('MongoDB 连接成功');
-  } catch (e: any) {
-    console.error('MongoDB 连接失败:', e.message);
-    if (e.name === 'MongooseServerSelectionError') {
-      console.error('无法连接到 MongoDB 服务器，请检查：');
-      console.error('1. 网络连接是否正常');
-      console.error('2. IP 地址是否已添加到 MongoDB Atlas 白名单');
-      console.error('3. 用户名和密码是否正确');
-      console.error('4. 数据库集群是否处于活动状态');
-      console.error('5. 连接字符串格式是否正确');
-      console.error('6. 当前 IP 地址:', '183.172.70.90');
-    }
-    throw e;
+  } catch (err: unknown) {
+    console.error('MongoDB 连接失败:', err);
+    throw new Error('MongoDB 连接失败');
   }
 }
 
