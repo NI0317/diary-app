@@ -11,9 +11,10 @@ interface DiaryListProps {
   entries: DiaryEntry[];
   onEdit: (entry: DiaryEntry) => void;
   onDelete: (id: string) => void;
+  disabled?: boolean;
 }
 
-export default function DiaryList({ entries = [], onEdit, onDelete }: DiaryListProps) {
+export default function DiaryList({ entries = [], onEdit, onDelete, disabled = false }: DiaryListProps) {
   return (
     <div className="space-y-6">
       {entries.map((entry) => (
@@ -28,13 +29,15 @@ export default function DiaryList({ entries = [], onEdit, onDelete }: DiaryListP
             <div className="flex space-x-2">
               <button
                 onClick={() => onEdit(entry)}
-                className="p-2 text-gray-400 hover:text-gray-500"
+                disabled={disabled}
+                className={`p-2 ${disabled ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-gray-500'}`}
               >
                 <PencilIcon className="h-5 w-5" />
               </button>
               <button
                 onClick={() => onDelete(entry._id)}
-                className="p-2 text-gray-400 hover:text-red-500"
+                disabled={disabled}
+                className={`p-2 ${disabled ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-red-500'}`}
               >
                 <TrashIcon className="h-5 w-5" />
               </button>

@@ -16,9 +16,14 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchEntries();
+    const startTime = performance.now();
+    fetchEntries().finally(() => {
+      const endTime = performance.now();
+      console.log(`页面加载时间: ${endTime - startTime}ms`);
+    });
   }, []);
 
   const fetchEntries = async () => {
@@ -32,7 +37,8 @@ export default function Home() {
       const data = await response.json();
       console.log('API response:', {
         raw: data,
-        formatted: Array.isArray(data) ? data : []
+        formatted: Array.isArray(data) ? data : [],
+        timestamp: new Date().toISOString()
       });
       setEntries(Array.isArray(data) ? data : []);
     } catch (err: unknown) {
@@ -45,12 +51,16 @@ export default function Home() {
   };
 
   const handleSave = async (formData: DiaryFormData) => {
+    if (isSubmitting) return;
+    
     try {
+      setIsSubmitting(true);
       console.log('Form validation:', {
         title: formData.title.trim(),
         content: formData.content.trim(),
         date: formData.date,
-        mood: formData.mood
+        mood: formData.mood,
+        timestamp: new Date().toISOString()
       });
 
       const url = formData._id 
@@ -72,7 +82,8 @@ export default function Home() {
         console.error('API error:', {
           status: response.status,
           statusText: response.statusText,
-          data: errorData
+          data: errorData,
+          timestamp: new Date().toISOString()
         });
         throw new Error(errorData.details || '保存失败');
       }
@@ -81,7 +92,8 @@ export default function Home() {
       console.log('State updates:', {
         entries: entries.length,
         editingEntry: editingEntry?._id,
-        savedEntry
+        savedEntry,
+        timestamp: new Date().toISOString()
       });
 
       setEntries(prev => {
@@ -97,6 +109,8 @@ export default function Home() {
     } catch (err) {
       console.error('保存失败:', err);
       setError('保存失败，请重试');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -155,6 +169,7 @@ export default function Home() {
         <DiaryForm
           onSubmit={handleSave}
           initialData={editingEntry || undefined}
+          disabled={isSubmitting}
         />
       </div>
 
@@ -176,6 +191,7 @@ export default function Home() {
           entries={entries}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          disabled={isSubmitting}
         />
       </div>
     </div>

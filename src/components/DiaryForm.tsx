@@ -3,6 +3,7 @@ import { useState, FormEvent } from 'react';
 interface DiaryFormProps {
   onSubmit: (data: DiaryFormData) => Promise<void>;
   initialData?: DiaryFormData;
+  disabled?: boolean;
 }
 
 export interface DiaryFormData {
@@ -18,7 +19,7 @@ export interface DiaryFormData {
   news: string;
 }
 
-export default function DiaryForm({ onSubmit, initialData }: DiaryFormProps) {
+export default function DiaryForm({ onSubmit, initialData, disabled = false }: DiaryFormProps) {
   const [formData, setFormData] = useState<DiaryFormData>(initialData || {
     title: '',
     content: '',
@@ -72,6 +73,7 @@ export default function DiaryForm({ onSubmit, initialData }: DiaryFormProps) {
           value={formData.date}
           onChange={(e) => setFormData({ ...formData, date: e.target.value })}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          disabled={disabled}
         />
       </div>
 
@@ -156,9 +158,12 @@ export default function DiaryForm({ onSubmit, initialData }: DiaryFormProps) {
 
       <button
         type="submit"
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        disabled={disabled}
+        className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+          disabled ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+        } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
       >
-        保存
+        {disabled ? '保存中...' : '保存'}
       </button>
     </form>
   );
