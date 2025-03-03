@@ -30,6 +30,10 @@ export default function Home() {
         throw new Error(errorData.details || '获取日记失败');
       }
       const data = await response.json();
+      console.log('API response:', {
+        raw: data,
+        formatted: Array.isArray(data) ? data : []
+      });
       setEntries(Array.isArray(data) ? data : []);
     } catch (err: unknown) {
       console.error('获取日记列表失败:', err);
@@ -42,6 +46,13 @@ export default function Home() {
 
   const handleSave = async (formData: DiaryFormData) => {
     try {
+      console.log('Form validation:', {
+        title: formData.title.trim(),
+        content: formData.content.trim(),
+        date: formData.date,
+        mood: formData.mood
+      });
+
       const url = formData._id 
         ? '/api/diary'  // 更新日记
         : '/api/diary'; // 创建新日记
@@ -57,10 +68,22 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('保存失败');
+        const errorData = await response.json();
+        console.error('API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: errorData
+        });
+        throw new Error(errorData.details || '保存失败');
       }
 
       const savedEntry = await response.json();
+      console.log('State updates:', {
+        entries: entries.length,
+        editingEntry: editingEntry?._id,
+        savedEntry
+      });
+
       setEntries(prev => {
         if (formData._id) {
           return prev.map(entry => 

@@ -1,17 +1,11 @@
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { DiaryFormData } from './DiaryForm';
 
-interface DiaryEntry {
+type DiaryEntry = Omit<DiaryFormData, '_id'> & {
   _id: string;
-  date: string;
-  mood: number;
-  learned: string;
-  improvements: string;
-  gratitude: string[];
-  lookingForward: string;
-  news: string;
-}
+};
 
 interface DiaryListProps {
   entries: DiaryEntry[];
