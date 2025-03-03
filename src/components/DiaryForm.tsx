@@ -6,6 +6,7 @@ interface DiaryFormProps {
 }
 
 export interface DiaryFormData {
+  _id?: string;
   title: string;
   date: string;
   mood: number;
