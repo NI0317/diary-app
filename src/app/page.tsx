@@ -5,13 +5,9 @@ import DiaryForm, { DiaryFormData } from '@/components/DiaryForm';
 import DiaryList from '@/components/DiaryList';
 import MoodChart from '@/components/MoodChart';
 
-interface DiaryEntry {
+type DiaryEntry = DiaryFormData & {
   _id: string;
-  title: string;
-  content: string;
-  mood: number;
-  date: string;
-}
+};
 
 export default function Home() {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
