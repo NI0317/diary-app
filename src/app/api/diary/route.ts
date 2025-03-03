@@ -2,6 +2,15 @@ import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/db';
 import DiaryEntry from '@/lib/models/DiaryEntry';
 
+const TIMEOUT = 8000; // 8 秒超时
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  const timeout = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('操作超时')), timeoutMs);
+  });
+  return Promise.race([promise, timeout]);
+}
+
 export async function GET() {
   try {
     console.log('开始获取日记列表...');
@@ -11,10 +20,13 @@ export async function GET() {
       timestamp: new Date().toISOString()
     });
     
-    await dbConnect();
+    await withTimeout(dbConnect(), TIMEOUT);
     console.log('数据库连接成功，开始查询...');
     
-    const entries = await DiaryEntry.find().sort({ date: -1 });
+    const entries = await withTimeout(
+      DiaryEntry.find().sort({ date: -1 }),
+      TIMEOUT
+    );
     console.log(`成功获取 ${entries.length} 条日记`);
     return NextResponse.json(entries);
   } catch (err) {
