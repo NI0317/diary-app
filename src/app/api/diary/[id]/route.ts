@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import DiaryEntry from '@/lib/models/DiaryEntry';
+import { NextRequest } from 'next/server';
 
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -24,7 +25,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
