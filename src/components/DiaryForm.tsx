@@ -7,7 +7,6 @@ interface DiaryFormProps {
 
 export interface DiaryFormData {
   _id?: string;
-  title: string;
   date: string;
   mood: number;
   learned: string;
@@ -19,7 +18,6 @@ export interface DiaryFormData {
 
 export default function DiaryForm({ onSubmit, initialData }: DiaryFormProps) {
   const [formData, setFormData] = useState<DiaryFormData>({
-    title: '',
     date: new Date().toISOString().split('T')[0],
     mood: 5,
     learned: '',
@@ -39,10 +37,6 @@ export default function DiaryForm({ onSubmit, initialData }: DiaryFormProps) {
     e.preventDefault();
 
     // 验证表单数据
-    if (!formData.title.trim()) {
-      alert('请输入标题');
-      return;
-    }
     if (!formData.learned.trim()) {
       alert('请输入今天学到了什么');
       return;
@@ -80,18 +74,6 @@ export default function DiaryForm({ onSubmit, initialData }: DiaryFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">标题</label>
-        <input
-          type="text"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          placeholder="请输入标题"
-          required
-        />
-      </div>
-
       <div>
         <label className="block text-sm font-medium text-gray-700">日期</label>
         <input

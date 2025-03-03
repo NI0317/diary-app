@@ -56,7 +56,6 @@ export default function Home() {
     try {
       setIsSubmitting(true);
       console.log('Form validation:', {
-        title: formData.title.trim(),
         date: formData.date,
         mood: formData.mood,
         timestamp: new Date().toISOString()
