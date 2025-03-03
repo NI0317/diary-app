@@ -2,13 +2,6 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import DiaryEntry from '@/lib/models/DiaryEntry';
 
-interface DiaryRequest {
-  title: string;
-  content: string;
-  mood: number;
-  date: string;
-}
-
 export async function POST(request: Request) {
   try {
     console.log('开始创建新日记...');
