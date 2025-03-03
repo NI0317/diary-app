@@ -77,17 +77,17 @@ export async function POST(request: NextRequest) {
     console.log('日记创建成功:', entry);
     
     return NextResponse.json(entry);
-  } catch (error: any) {
-    console.error('创建日记失败:', error);
+  } catch (err: unknown) {
+    console.error('创建日记失败:', err);
     console.error('错误详情:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
+      name: err instanceof Error ? err.name : '未知错误类型',
+      message: err instanceof Error ? err.message : '未知错误',
+      stack: err instanceof Error ? err.stack : undefined
     });
     
     return NextResponse.json({ 
       error: '创建日记失败',
-      details: error.message
+      details: err instanceof Error ? err.message : '未知错误'
     }, { status: 500 });
   }
 }
