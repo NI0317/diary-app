@@ -3,20 +3,14 @@ import dbConnect from '@/lib/db';
 import DiaryEntry from '@/lib/models/DiaryEntry';
 import { NextRequest } from 'next/server';
 
-type RouteContext = {
-  params: {
-    id: string;
-  };
-};
-
 export async function PUT(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ) {
   try {
     await dbConnect();
     const data = await request.json();
-    const entry = await DiaryEntry.findByIdAndUpdate(context.params.id, data, {
+    const entry = await DiaryEntry.findByIdAndUpdate(params.id, data, {
       new: true,
       runValidators: true,
     });
@@ -32,11 +26,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ) {
   try {
     await dbConnect();
-    const entry = await DiaryEntry.findByIdAndDelete(context.params.id);
+    const entry = await DiaryEntry.findByIdAndDelete(params.id);
     if (!entry) {
       return NextResponse.json({ error: '日记不存在' }, { status: 404 });
     }
