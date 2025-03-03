@@ -53,13 +53,42 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('开始创建新日记...');
     await dbConnect();
+    console.log('数据库连接成功');
+    
     const data = await request.json();
+    console.log('接收到的数据:', JSON.stringify(data, null, 2));
+    
+    // 验证必需字段
+    const requiredFields = ['title', 'date', 'mood', 'learned', 'improvements', 'gratitude', 'lookingForward', 'news'];
+    const missingFields = requiredFields.filter(field => !data[field]);
+    
+    if (missingFields.length > 0) {
+      console.error('缺少必需字段:', missingFields);
+      return NextResponse.json({ 
+        error: '创建日记失败',
+        details: `缺少必需字段: ${missingFields.join(', ')}`
+      }, { status: 400 });
+    }
+
+    console.log('开始创建日记条目...');
     const entry = await DiaryEntry.create(data);
-    return NextResponse.json(entry, { status: 201 });
-  } catch (err) {
-    console.error('创建日记失败:', err);
-    return NextResponse.json({ error: '创建日记失败' }, { status: 500 });
+    console.log('日记创建成功:', entry);
+    
+    return NextResponse.json(entry);
+  } catch (error: any) {
+    console.error('创建日记失败:', error);
+    console.error('错误详情:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    
+    return NextResponse.json({ 
+      error: '创建日记失败',
+      details: error.message
+    }, { status: 500 });
   }
 }
 

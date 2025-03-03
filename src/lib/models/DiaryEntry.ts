@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const DiaryEntrySchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
   date: {
     type: Date,
     required: true,
