@@ -43,44 +43,40 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = async (data: DiaryFormData) => {
+  const handleSave = async (formData: DiaryFormData) => {
     try {
-      setError(null);
-      setSuccess(null);
+      const url = formData._id 
+        ? '/api/diary'  // 更新日记
+        : '/api/diary'; // 创建新日记
       
-      if (editingEntry) {
-        const response = await fetch(`/api/diary/${editingEntry._id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.details || '更新日记失败');
-        }
-        
-        setEditingEntry(null);
-        setSuccess('日记更新成功');
-        await fetchEntries();
-      } else {
-        const response = await fetch('/api/diary', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.details || '保存日记失败');
-        }
-        
-        setSuccess('日记保存成功');
-        await fetchEntries();
+      const method = formData._id ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('保存失败');
       }
-    } catch (err: unknown) {
-      console.error('保存日记失败:', err);
-      setError('保存日记失败');
+
+      const savedEntry = await response.json();
+      setEntries(prev => {
+        if (formData._id) {
+          return prev.map(entry => 
+            entry._id === formData._id ? savedEntry : entry
+          );
+        }
+        return [savedEntry, ...prev];
+      });
+      setEditingEntry(null);
+      setSuccess('日记保存成功');
+    } catch (err) {
+      console.error('保存失败:', err);
+      setError('保存失败，请重试');
     }
   };
 
@@ -91,28 +87,24 @@ export default function Home() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('确定要删除这条日记吗？')) {
+    if (!confirm('确定要删除这条日记吗？')) {
       return;
     }
 
     try {
-      setError(null);
-      setSuccess(null);
-      
-      const response = await fetch(`/api/diary/${id}`, {
+      const response = await fetch(`/api/diary?id=${id}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || '删除日记失败');
+        throw new Error('删除失败');
       }
-      
+
+      setEntries(prev => prev.filter(entry => entry._id !== id));
       setSuccess('日记删除成功');
-      await fetchEntries();
-    } catch (err: unknown) {
-      console.error('删除日记失败:', err);
-      setError('删除日记失败');
+    } catch (err) {
+      console.error('删除失败:', err);
+      setError('删除失败，请重试');
     }
   };
 
@@ -141,7 +133,7 @@ export default function Home() {
           {editingEntry ? '编辑日记' : '新建日记'}
         </h2>
         <DiaryForm
-          onSubmit={handleSubmit}
+          onSubmit={handleSave}
           initialData={editingEntry || undefined}
         />
       </div>
